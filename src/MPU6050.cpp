@@ -151,7 +151,7 @@ float MPU6050_Base::get_gyro_resolution() {
  */
 bool MPU6050_Base::testConnection() {
   uint8_t deviceId = getDeviceID();
-  return (deviceId == 0x34) || (deviceId == 0xC) || (deviceId == 0x3A);
+  return (deviceId == 0x34) || (deviceId == 0xC) || (deviceId == 0x3A) || (deviceId == 0x39);
 }
 
 // AUX_VDDIO register (InvenSense demo code calls this RA_*G_OFFS_TC)
@@ -3037,36 +3037,36 @@ void MPU6050_Base::setZFineGain(int8_t gain) {
 // XA_OFFS_* registers
 
 int16_t MPU6050_Base::getXAccelOffset() {
-	uint8_t SaveAddress = ((getDeviceID() < 0x38 )? MPU6050_RA_XA_OFFS_H:0x77); // MPU6050,MPU9150 Vs MPU6500,MPU9250
+	uint8_t SaveAddress = ((getDeviceID() < 0x38 || getDeviceID() == 0x39 )? MPU6050_RA_XA_OFFS_H:0x77); // MPU6050,MPU9150 Vs MPU6500,MPU9250
 	I2Cdev::readBytes(devAddr, SaveAddress, 2, buffer, I2Cdev::readTimeout, wireObj);
 	return (((int16_t)buffer[0]) << 8) | buffer[1];
 }
 void MPU6050_Base::setXAccelOffset(int16_t offset) {
-	uint8_t SaveAddress = ((getDeviceID() < 0x38 )? MPU6050_RA_XA_OFFS_H:0x77); // MPU6050,MPU9150 Vs MPU6500,MPU9250
+	uint8_t SaveAddress = ((getDeviceID() < 0x38 || getDeviceID() == 0x39 )? MPU6050_RA_XA_OFFS_H:0x77); // MPU6050,MPU9150 Vs MPU6500,MPU9250
 	I2Cdev::writeWord(devAddr, SaveAddress, offset, wireObj);
 }
 
 // YA_OFFS_* register
 
 int16_t MPU6050_Base::getYAccelOffset() {
-	uint8_t SaveAddress = ((getDeviceID() < 0x38 )? MPU6050_RA_YA_OFFS_H:0x7A); // MPU6050,MPU9150 Vs MPU6500,MPU9250
+	uint8_t SaveAddress = ((getDeviceID() < 0x38 || getDeviceID() == 0x39 )? MPU6050_RA_YA_OFFS_H:0x7A); // MPU6050,MPU9150 Vs MPU6500,MPU9250
 	I2Cdev::readBytes(devAddr, SaveAddress, 2, buffer, I2Cdev::readTimeout, wireObj);
 	return (((int16_t)buffer[0]) << 8) | buffer[1];
 }
 void MPU6050_Base::setYAccelOffset(int16_t offset) {
-	uint8_t SaveAddress = ((getDeviceID() < 0x38 )? MPU6050_RA_YA_OFFS_H:0x7A); // MPU6050,MPU9150 Vs MPU6500,MPU9250
+	uint8_t SaveAddress = ((getDeviceID() < 0x38 || getDeviceID() == 0x39 )? MPU6050_RA_YA_OFFS_H:0x7A); // MPU6050,MPU9150 Vs MPU6500,MPU9250
 	I2Cdev::writeWord(devAddr, SaveAddress, offset, wireObj);
 }
 
 // ZA_OFFS_* register
 
 int16_t MPU6050_Base::getZAccelOffset() {
-	uint8_t SaveAddress = ((getDeviceID() < 0x38 )? MPU6050_RA_ZA_OFFS_H:0x7D); // MPU6050,MPU9150 Vs MPU6500,MPU9250
+	uint8_t SaveAddress = ((getDeviceID() < 0x38 || getDeviceID() == 0x39 )? MPU6050_RA_ZA_OFFS_H:0x7D); // MPU6050,MPU9150 Vs MPU6500,MPU9250
 	I2Cdev::readBytes(devAddr, SaveAddress, 2, buffer, I2Cdev::readTimeout, wireObj);
 	return (((int16_t)buffer[0]) << 8) | buffer[1];
 }
 void MPU6050_Base::setZAccelOffset(int16_t offset) {
-	uint8_t SaveAddress = ((getDeviceID() < 0x38 )? MPU6050_RA_ZA_OFFS_H:0x7D); // MPU6050,MPU9150 Vs MPU6500,MPU9250
+	uint8_t SaveAddress = ((getDeviceID() < 0x38 || getDeviceID() == 0x39 )? MPU6050_RA_ZA_OFFS_H:0x7D); // MPU6050,MPU9150 Vs MPU6500,MPU9250
 	I2Cdev::writeWord(devAddr, SaveAddress, offset, wireObj);
 }
 
@@ -3435,7 +3435,7 @@ void MPU6050_Base::CalibrateAccel(uint8_t Loops ) {
 }
 
 void MPU6050_Base::PID(uint8_t ReadAddress, float kP,float kI, uint8_t Loops){
-	uint8_t SaveAddress = (ReadAddress == 0x3B)?((getDeviceID() < 0x38 )? 0x06:0x77):0x13;
+	uint8_t SaveAddress = (ReadAddress == 0x3B)?((getDeviceID() < 0x38 || getDeviceID() == 0x39 )? 0x06:0x77):0x13;
 
 	int16_t  Data;
 	float Reading;
@@ -3499,7 +3499,7 @@ void MPU6050_Base::PID(uint8_t ReadAddress, float kP,float kI, uint8_t Loops){
 }
 
 int16_t * MPU6050_Base::GetActiveOffsets() {
-    uint8_t AOffsetRegister = (getDeviceID() < 0x38 )? MPU6050_RA_XA_OFFS_H:0x77;
+    uint8_t AOffsetRegister = (getDeviceID() < 0x38 || getDeviceID() == 0x39 )? MPU6050_RA_XA_OFFS_H:0x77;
     if(AOffsetRegister == 0x06)	I2Cdev::readWords(devAddr, AOffsetRegister, 3, (uint16_t *)offsets, I2Cdev::readTimeout, wireObj);
     else {
         I2Cdev::readWords(devAddr, AOffsetRegister, 1, (uint16_t *)offsets, I2Cdev::readTimeout, wireObj);
